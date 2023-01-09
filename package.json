@@ -1,0 +1,27 @@
+{
+  "name": "spotify_artist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ll8464/spotify_artist.git"
+  },
+  "keywords": [
+    "artist"
+  ],
+  "author": "Lee Lacey",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ll8464/spotify_artist/issues"
+  },
+  "homepage": "https://github.com/ll8464/spotify_artist#readme",
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "express": "^4.18.2",
+    "require": "^2.4.20"
+  }
+}
