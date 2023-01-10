@@ -1,8 +1,8 @@
 //OG Attempt
 
 const APIController = (function () {
-  const clientId = "5cafeab8a51d493abe63a82c3fa08651";
-  const clientSecret = "ec01fd0a65b242e4937ef7d1c276d35a";
+  const clientId = "";
+  const clientSecret = "";
 
   const basedCode = btoa(clientId + ":" + clientSecret);
 
@@ -21,32 +21,33 @@ const APIController = (function () {
   };
 
   const _getArtist = async (token, artistId) => {
-    const result = await fetch(`https://api.spotify.com/v1/${artistId}/1.1`, {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-        Host: "api.spotify.com",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+    const result = await fetch(
+      `https://api.spotify.com/v1/artists/${artistId}`,
+
+      {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
 
     const data = await result.json();
     return data;
   };
 
-  // const _getGenres = async (token) => {
-  //   const result = await fetch(
-  //     `https://api.spotify.com/v1/browse/categories?locale=sv_US`,
-  //     {
-  //       method: "GET",
-  //       headers: { Authorization: "Bearer " + token },
-  //     }
-  //   );
+  const _getGenres = async (token) => {
+    const result = await fetch(
+      `https://api.spotify.com/v1/browse/categories?locale=sv_US`,
+      {
+        method: "GET",
+        headers: { Authorization: "Bearer " + token },
+      }
+    );
 
-  //   const data = await result.json();
-  //   return data.categories.items;
-  // };
+    const data = await result.json();
+    return data;
+  };
 
   return {
     getToken() {
@@ -55,9 +56,6 @@ const APIController = (function () {
     getArtist(token, artistId) {
       return _getArtist(token, artistId);
     },
-    // getGenres(token) {
-    //   return _getGenres(token);
-    // },
   };
 })();
 
@@ -88,12 +86,6 @@ const UIController = (function () {
         token: document.querySelector(DOMElements.hfToken).value,
       };
     },
-    createInfo(text, value) {
-      const html = `<option value="${value}">${text}</option>`;
-      document
-        .querySelector(DOMElements.selectArtist)
-        .insertAdjacentHTML("beforeend", html);
-    },
   };
 })();
 
@@ -111,21 +103,42 @@ const APPController = (function (UICtrl, APICtrl) {
   };
 
   //submit button click event listener
-  DOMInputs.submit.addEventListener,
-    ("click",
-    async (e) => {
-      e.preventDefault();
-      const token = UICtrl.getStoredToken().token;
-      const artist = await APICtrl.getArtist(token, e);
-      artist.forEach((a) => UICtrl.createInfo(a, a));
-      artist.forEach((p) => console.log(p));
-    });
-
-  //create artist event listener
-  DOMInputs.artist.addEventListener("change", async (event) => {
+  DOMInputs.submit.addEventListener("click", async (e) => {
+    console.log("Event Listener is working");
+    e.preventDefault();
+    const form = document.getElementById("artist_info");
+    const userQuery = form.elements["input_artist"].value;
+    const test = "2Mu5NfyYm8n5iTomuKAEHl";
     const token = UICtrl.getStoredToken().token;
-    const artist = await APICtrl.getArtist(token, event);
-    artist.forEach((p) => console.log(p));
+    console.log(userQuery);
+    const artist = await APICtrl.getArtist(token, userQuery);
+
+    const results = document.getElementById("results");
+
+    let allGenres = "";
+
+    for (let i = 0; i < artist.genres.length; i++) {
+      allGenres += artist.genres[i] + "<br>";
+    }
+
+    const html = `
+    <div class="row col-sm-12 px-0">
+    <a href="${artist.external_urls.spotify} target="SpotifyWindow"><img src="${artist.images[0].url}" alt="Picture of ${artist.name}"></a>        
+</div>
+<div class="row col-sm-12 px-0">
+    <label for="artist" class="form-label col-sm-12">By ${artist.name}</label>
+</div>
+<div class="row col-sm-12 px-0">
+    <label for="followers" class="form-label col-sm-12">Number of Followers: ${artist.followers.total}</label>
+</div>
+<div class="row col-sm-12 px-0">
+    <label for="genres" class="form-label col-sm-12">Genres: <br> ${allGenres}</label>
+</div>
+ `;
+
+    results.insertAdjacentHTML("beforeend", html);
+
+    console.log(artist);
   });
 
   return {
