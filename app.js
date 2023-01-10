@@ -1,8 +1,8 @@
 //OG Attempt
 
 const APIController = (function () {
-  const clientId = "5cafeab8a51d493abe63a82c3fa08651";
-  const clientSecret = "ec01fd0a65b242e4937ef7d1c276d35a";
+  const clientId = "";
+  const clientSecret = "";
 
   const basedCode = btoa(clientId + ":" + clientSecret);
 
