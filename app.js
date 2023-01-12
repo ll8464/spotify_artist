@@ -109,6 +109,30 @@ const UIController = (function () {
         token: document.querySelector(DOMElements.hfToken).value,
       };
     },
+    createResults(artist) {
+      let allGenres = "";
+
+      for (let i = 0; i < artist.genres.length; i++) {
+        allGenres += artist.genres[i] + "<br>";
+      }
+      const html = `
+        <label for="results">Results:</label>
+        <div class="row col-sm-12 px-0">
+        <a href="${artist.external_urls.spotify} target="SpotifyWindow"><img src="${artist.images[0].url}" alt="Picture of ${artist.name}"></a>
+    </div>
+    <div class="row col-sm-12 px-0">
+        <label for="artist" class="form-label col-sm-12">By ${artist.name}</label>
+    </div>
+    <div class="row col-sm-12 px-0">
+        <label for="followers" class="form-label col-sm-12">Number of Followers: ${artist.followers.total}</label>
+    </div>
+    <div class="row col-sm-12 px-0">
+        <label for="genres" class="form-label col-sm-12">Genres: <br> ${allGenres}</label>
+    </div>
+     `;
+
+      results.insertAdjacentHTML("beforeend", html);
+    },
   };
 })();
 
@@ -144,29 +168,7 @@ const APPController = (function (UICtrl, APICtrl) {
 
     const artist = await APICtrl.getArtist(token, artistCall);
 
-    let allGenres = "";
-
-    for (let i = 0; i < artist.genres.length; i++) {
-      allGenres += artist.genres[i] + "<br>";
-    }
-
-    const html = `
-        <label for="results">Results:</label>
-        <div class="row col-sm-12 px-0">
-        <a href="${artist.external_urls.spotify} target="SpotifyWindow"><img src="${artist.images[0].url}" alt="Picture of ${artist.name}"></a>
-    </div>
-    <div class="row col-sm-12 px-0">
-        <label for="artist" class="form-label col-sm-12">By ${artist.name}</label>
-    </div>
-    <div class="row col-sm-12 px-0">
-        <label for="followers" class="form-label col-sm-12">Number of Followers: ${artist.followers.total}</label>
-    </div>
-    <div class="row col-sm-12 px-0">
-        <label for="genres" class="form-label col-sm-12">Genres: <br> ${allGenres}</label>
-    </div>
-     `;
-
-    DOMInputs.results.insertAdjacentHTML("beforeend", html);
+    UICtrl.createResults(artist);
 
     console.log(search);
 
