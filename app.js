@@ -36,6 +36,22 @@ const APIController = (function () {
     return data;
   };
 
+  const _getSearch = async (token, query) => {
+    const result = await fetch(
+      `https://api.spotify.com/v1/search?q=${query}&type=artist`,
+
+      {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    const data = await result.json();
+    return data;
+  };
+
   const _getGenres = async (token) => {
     const result = await fetch(
       `https://api.spotify.com/v1/browse/categories?locale=sv_US`,
@@ -56,6 +72,9 @@ const APIController = (function () {
     getArtist(token, artistId) {
       return _getArtist(token, artistId);
     },
+    getSearch(token, query) {
+      return _getSearch(token, query);
+    },
   };
 })();
 
@@ -68,6 +87,8 @@ const UIController = (function () {
     buttonSubmit: "#btn_submit",
     hfToken: "#hidden_token",
     inputArtist: "#input_artist",
+    form: "#artist_info",
+    results: "#results",
   };
 
   //public methods
@@ -76,6 +97,8 @@ const UIController = (function () {
       return {
         submit: document.querySelector(DOMElements.buttonSubmit),
         artist: document.querySelector(DOMElements.inputArtist),
+        form: document.querySelector(DOMElements.form),
+        results: document.querySelector(DOMElements.results),
       };
     },
     storeToken(value) {
@@ -104,16 +127,22 @@ const APPController = (function (UICtrl, APICtrl) {
 
   //submit button click event listener
   DOMInputs.submit.addEventListener("click", async (e) => {
-    console.log("Event Listener is working");
     e.preventDefault();
-    const form = document.getElementById("artist_info");
-    const userQuery = form.elements["input_artist"].value;
-    const test = "2Mu5NfyYm8n5iTomuKAEHl";
-    const token = UICtrl.getStoredToken().token;
-    console.log(userQuery);
-    const artist = await APICtrl.getArtist(token, userQuery);
 
-    const results = document.getElementById("results");
+    const userQuery = DOMInputs.form.elements["input_artist"].value;
+
+    //Encodes user queries to ASCII for use in URI
+    const encodeQuery = encodeURIComponent(userQuery);
+
+    //console.log(encodeQuery);
+
+    const token = UICtrl.getStoredToken().token;
+
+    const search = await APICtrl.getSearch(token, encodeQuery);
+
+    const artistCall = await search.artists.items[0].id;
+
+    const artist = await APICtrl.getArtist(token, artistCall);
 
     let allGenres = "";
 
@@ -122,21 +151,24 @@ const APPController = (function (UICtrl, APICtrl) {
     }
 
     const html = `
+        <label for="results">Results:</label>
+        <div class="row col-sm-12 px-0">
+        <a href="${artist.external_urls.spotify} target="SpotifyWindow"><img src="${artist.images[0].url}" alt="Picture of ${artist.name}"></a>
+    </div>
     <div class="row col-sm-12 px-0">
-    <a href="${artist.external_urls.spotify} target="SpotifyWindow"><img src="${artist.images[0].url}" alt="Picture of ${artist.name}"></a>        
-</div>
-<div class="row col-sm-12 px-0">
-    <label for="artist" class="form-label col-sm-12">By ${artist.name}</label>
-</div>
-<div class="row col-sm-12 px-0">
-    <label for="followers" class="form-label col-sm-12">Number of Followers: ${artist.followers.total}</label>
-</div>
-<div class="row col-sm-12 px-0">
-    <label for="genres" class="form-label col-sm-12">Genres: <br> ${allGenres}</label>
-</div>
- `;
+        <label for="artist" class="form-label col-sm-12">By ${artist.name}</label>
+    </div>
+    <div class="row col-sm-12 px-0">
+        <label for="followers" class="form-label col-sm-12">Number of Followers: ${artist.followers.total}</label>
+    </div>
+    <div class="row col-sm-12 px-0">
+        <label for="genres" class="form-label col-sm-12">Genres: <br> ${allGenres}</label>
+    </div>
+     `;
 
-    results.insertAdjacentHTML("beforeend", html);
+    DOMInputs.results.insertAdjacentHTML("beforeend", html);
+
+    console.log(search);
 
     console.log(artist);
   });
